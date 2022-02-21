@@ -2,22 +2,22 @@
 
 const NOTION_ENDPOINT = 'https://api.notion.com/v1/pages';
 const TITLE_COLUMN_NAME = 'タイトル';
-const DATE_COLUMN_NAME = '行動予定日';
+const MEMO_COLUMN_NAME = 'メモ';
 
 $title = $argv[1] ?? null;
-$date = $argv[2] ?? null;
-$formattedDate = null;
+$memo = $argv[2] ?? null;
 
 if (!$title) {
     echo 'Error: タイトルが入力されていません。';
 }
 
-if ($date) {
-    $dateTime = DateTime::createFromFormat('Y/m/d', $date);
-    $formattedDate = $dateTime->format('Y-m-d');
-}
+// 日付
+// if ($date) {
+//     $dateTime = DateTime::createFromFormat('Y/m/d', $date);
+//     $formattedDate = $dateTime->format('Y-m-d');
+// }
 
-addTaskToNotion($title, $formattedDate);
+addTaskToNotion($title, $memo);
 
 
 /**
@@ -27,16 +27,16 @@ addTaskToNotion($title, $formattedDate);
  * @param string|null $formattedDate
  * @return void
  */
-function addTaskToNotion(string $title, ?string $formattedDate = null)
+function addTaskToNotion(string $title, ?string $memo = null)
 {
     $payload = [
         'parent' => [
             'database_id' => $_ENV['DATABASE_ID'],
         ],
         'properties' => [
-            'TITLE_COLUMN_NAME' => [
+            TITLE_COLUMN_NAME => [
                 'title' => [
-                        [
+                    [
                         'text' => [
                             'content' => $title,
                         ],
@@ -46,12 +46,26 @@ function addTaskToNotion(string $title, ?string $formattedDate = null)
         ],
     ];
 
-    if ($formattedDate) {
-        $payload['properties'][DATE_COLUMN_NAME] = [
-            'type' => 'date',
-            'date' => [
-                'start' => $formattedDate,
-            ],
+    // 日付
+    // if ($formattedDate) {
+    //     $payload['properties'][DATE_COLUMN_NAME] = [
+    //         'type' => 'date',
+    //         'date' => [
+    //             'start' => $formattedDate,
+    //         ],
+    //     ];
+    // }
+
+    // メモ
+    if ($memo) {
+        $payload['properties'][MEMO_COLUMN_NAME] = [
+            'rich_text' => [
+                [
+                    'text' => [
+                        'content' => $memo,
+                    ],
+                ]
+            ]
         ];
     }
 
@@ -74,10 +88,9 @@ function addTaskToNotion(string $title, ?string $formattedDate = null)
     curl_close($ch);
 
     if ($responseCode === 200) {
-        if (isset($title) && isset($formattedDate)) {
-            echo '「' . $title . '（' . $formattedDate . '）」を追加しました';
-        } else if (isset($title)) {
-
+        if (isset($title) && isset($memo)) {
+            echo '「' . $title . '（' . $memo . '）」を追加しました';
+        } elseif (isset($title)) {
             echo '「' . $title . '」を追加しました';
         }
     } else {
