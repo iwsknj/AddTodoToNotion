@@ -4,8 +4,14 @@ const NOTION_ENDPOINT = 'https://api.notion.com/v1/pages';
 const TITLE_COLUMN_NAME = 'タイトル';
 const MEMO_COLUMN_NAME = 'メモ';
 
-$title = $argv[1] ?? null;
-$memo = $argv[2] ?? null;
+$queries = explode(' ', $argv[1]);
+if (count($queries) > 0) {
+    $title = $queries[0];
+    $memo = $queries[1];
+} else {
+    $title = $argv[1];
+    $memo = null;
+}
 
 if (!$title) {
     echo 'Error: タイトルが入力されていません。';
